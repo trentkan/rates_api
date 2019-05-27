@@ -1,4 +1,5 @@
 class RatesProcessor
+	class InvalidParametersViolation < Exception; end
 
 	attr_reader :errors, :successful
 
@@ -8,28 +9,43 @@ class RatesProcessor
 	end
 
 	def create(rates)
-		existing_rates_with_times = {}
+		begin
+			raise InvalidParametersViolation unless rates.is_a?(Array)
 
-		formatted_rates = rates.each_with_object([]) do |rate, master_rates|
-			rate[:days].split(',').each do |day|
-				if times_overlap?(existing_rates_with_times, rate[:times], day)
-					@errors << "Overlapping rate for day at #{rate[:times]}"
-					break
-				else
-					master_rates << format_rate(rate, day)
-				end
+			existing_rates_with_times = {}
+
+			formatted_rates = rates.each_with_object([]) do |rate, master_rates|
+				raise InvalidParametersViolation unless parameters_valid?(rate)
+				
+				add_rate_if_no_overlap(rate, existing_rates_with_times, master_rates)
+
+				break if @errors.present?
 			end
-			break if @errors.present?
-		end
 
-		if @errors.present?
+			if @errors.present?
+				@successful = false
+			else
+				Rate.import(formatted_rates)
+			end
+		rescue ActiveRecord::NotNullViolation, InvalidParametersViolation
 			@successful = false
-		else
-			Rate.import(formatted_rates)
+
+			@errors << 'Poorly formatted input, please try again.'
 		end
 	end
 
 	private
+
+	def add_rate_if_no_overlap(rate, existing_rates, master_rates)
+		rate[:days].split(',').each do |day|
+			if times_overlap?(existing_rates, rate[:times], day)
+				@errors << "Overlapping rate for day at #{rate[:times]}"
+				break
+			else
+				master_rates << format_rate(rate, day)
+			end
+		end
+	end
 
 	def format_rate(rate, day)
 		time = rate[:times].split('-')
@@ -61,5 +77,13 @@ class RatesProcessor
 		existing_rates[day] = [new_rate]
 
 		false
+	end
+
+	def parameters_valid?(rate)
+		times = rate[:times] && rate[:times].split('-')
+		times_valid = times && times.length == 2 && ('0000'..'2400').include?(times.first) && ('0000'..'2400').include?(times.last)
+		price_valid = rate[:price] && rate[:price].is_a?(Integer)
+
+		times_valid && price_valid && rate[:days] && rate[:tz]
 	end
 end

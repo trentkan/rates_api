@@ -24,6 +24,149 @@ describe RatesProcessor do
 			end
 		end
 
+		context 'malformed input' do
+			shared_examples 'error due to malformed input' do
+				it 'records an error' do
+					subject.create(rates[:rates])
+
+					expect(subject.errors.first).to eq 'Poorly formatted input, please try again.'
+				end
+			end
+
+			context 'rates is not an array' do
+				let(:rates) do
+					{
+						rates: 'bad parameter'
+					}
+				end
+
+				it_behaves_like 'error due to malformed input'
+			end
+
+			context 'malformed times parameter' do
+				context 'start time and end time is not separated by - character' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"times": "09002100",
+									"tz": "America/Chicago",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+
+				context 'start time is not between 0000 and 2400' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"times": "2500-2100",
+									"tz": "America/Chicago",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+				
+				context 'end time is not between 0000 and 2400' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"times": "0900-2500",
+									"tz": "America/Chicago",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+			end
+
+			context 'malformed price parameter' do
+				context 'price is not an integer' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"times": "0900-2100",
+									"tz": "America/Chicago",
+									"price": '1500'
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+			end
+
+			# Not necessary for day missing because rate will not be posted
+			context 'missing parameters' do
+				context 'times missing' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"tz": "America/Chicago",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+
+				context 'tz missing' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"times": "0900-2100",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+
+				context 'price missing' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"times": "0900-2100",
+									"tz": "America/Chicago"
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+			end
+		end
+
 		context 'for one day' do
 			let(:rates) do
 				{

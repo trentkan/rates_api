@@ -6,12 +6,14 @@ class RatesController < ApplicationController
 
 	# User can create a new rate group
 	def create
-		rates_processor.create
+		params.permit!
+		rates_processor.create(params[:rates])
 
 		if rates_processor.successful
 			render :json, code: 200
 		else
-			render :json, { errors: @errors }, code: 400
+			render json: { errors: rates_processor.errors }, code: 400
+		end
 	end
 
 	private
