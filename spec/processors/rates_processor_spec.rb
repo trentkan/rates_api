@@ -2,6 +2,28 @@ require 'rails_helper'
 
 describe RatesProcessor do
 	describe '#create' do
+		shared_examples 'a successful request to update the rate' do
+			it 'creates the rate' do
+				expect(Rate).to receive(:import).with(expected_rate)
+				
+				subject.create(rates[:rates])
+			end
+		end
+
+		shared_examples 'an unsuccessful request to update the rate' do
+			it 'creates the rate' do
+				expect(Rate).not_to receive(:import).with(expected_rate)
+				
+				subject.create(rates[:rates])
+			end
+
+			it 'records an error' do
+				subject.create(rates[:rates])
+
+				expect(subject.errors).not_to be_empty
+			end
+		end
+
 		context 'for one day' do
 			let(:rates) do
 				{
@@ -16,13 +38,11 @@ describe RatesProcessor do
 				}
 			end
 
-			it 'creates the rate' do
-				expect(Rate).to receive(:import).with([
-					{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 }
-				])
-				
-				subject.create(rates[:rates])
+			let(:expected_rate) do 
+				[{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 }]
 			end
+
+			it_behaves_like 'a successful request to update the rate'
 		end
 
 		context 'for multiple days' do
@@ -39,14 +59,14 @@ describe RatesProcessor do
 				}
 			end
 
-			it 'creates the rate' do
-				expect(Rate).to receive(:import).with([
+			let(:expected_rate) do
+				[
 					{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
 					{ day: 'tues', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 }
-				])
-				
-				subject.create(rates[:rates])
+				]
 			end
+				
+			it_behaves_like 'a successful request to update the rate'
 
 			context 'with overlapping rates' do
 				let(:rates) do
@@ -68,14 +88,14 @@ describe RatesProcessor do
 					}
 				end
 
-				it 'does not creates the rate' do
-					expect(Rate).to receive(:import).with([
+				let(:expected_rate) do
+					[
 						{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
 						{ day: 'tues', start_time: '01:00', end_time: '10:00', time_zone: 'America/Chicago', price: 2500 }
-					])
-					
-					subject.create(rates[:rates])
+					]
 				end
+					
+				it_behaves_like 'a successful request to update the rate'
 			end
 		end
 
@@ -100,17 +120,17 @@ describe RatesProcessor do
 					}
 				end
 
-				it 'creates the rate' do
-					expect(Rate).to receive(:import).with([
+				let(:expected_rate) do
+					[
 						{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
 						{ day: 'mon', start_time: '01:00', end_time: '09:00', time_zone: 'America/Chicago', price: 2500 }
-					])
-					
-					subject.create(rates[:rates])
+					]
 				end
+					
+				it_behaves_like 'a successful request to update the rate'
 			end
 
-			context 'with non-overlapping, but touching' do
+			context 'with non-overlapping, but touching rates' do
 				let(:rates) do
 					{
 						"rates": [
@@ -130,14 +150,14 @@ describe RatesProcessor do
 					}
 				end
 
-				it 'creates the rate' do
-					expect(Rate).to receive(:import).with([
+				let(:expected_rate) do
+					[
 						{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
 						{ day: 'mon', start_time: '21:00', end_time: '24:00', time_zone: 'America/Chicago', price: 2500 }
-					])
-					
-					subject.create(rates[:rates])
+					]
 				end
+					
+				it_behaves_like 'a successful request to update the rate'
 			end
 
 			context 'with overlapping rates' do
@@ -161,14 +181,14 @@ describe RatesProcessor do
 						}
 					end
 
-					it 'does not creates the rate' do
-						expect(Rate).not_to receive(:import).with([
+					let(:expected_rate) do
+						[
 							{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
 							{ day: 'mon', start_time: '20:00', end_time: '24:00', time_zone: 'America/Chicago', price: 2500 }
-						])
-						
-						subject.create(rates[:rates])
+						]
 					end
+						
+					it_behaves_like 'an unsuccessful request to update the rate'
 				end
 
 				context 'new rate end overlaps' do
@@ -191,14 +211,14 @@ describe RatesProcessor do
 						}
 					end
 
-					it 'does not creates the rate' do
-						expect(Rate).not_to receive(:import).with([
+					let(:expected_rate) do
+						[
 							{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
 							{ day: 'mon', start_time: '01:00', end_time: '10:00', time_zone: 'America/Chicago', price: 2500 }
-						])
-						
-						subject.create(rates[:rates])
+						]
 					end
+						
+					it_behaves_like 'an unsuccessful request to update the rate'
 				end
 				
 				context 'old rate end within' do
@@ -221,14 +241,14 @@ describe RatesProcessor do
 						}
 					end
 					
-					it 'does not creates the rate' do
-						expect(Rate).not_to receive(:import).with([
+					let(:expected_rate) do
+						[
 							{ day: 'mon', start_time: '09:00', end_time: '11:00', time_zone: 'America/Chicago', price: 1500 },
 							{ day: 'mon', start_time: '08:00', end_time: '12:00', time_zone: 'America/Chicago', price: 2500 }
-						])
-						
-						subject.create(rates[:rates])
+						]
 					end
+						
+					it_behaves_like 'an unsuccessful request to update the rate'
 				end
 			end
 		end

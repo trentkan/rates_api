@@ -1,6 +1,10 @@
 class RatesProcessor
+
+	attr_reader :errors, :successful
+
 	def initialize
 		@errors = []
+		@successful = true
 	end
 
 	def create(rates)
@@ -8,13 +12,21 @@ class RatesProcessor
 
 		formatted_rates = rates.each_with_object([]) do |rate, master_rates|
 			rate[:days].split(',').each do |day|
-				# Exists - check times do not overlap
-				# Does not exist - add
-				master_rates << format_rate(rate, day) unless times_overlap?(existing_rates_with_times, rate[:times], day)
+				if times_overlap?(existing_rates_with_times, rate[:times], day)
+					@errors << "Overlapping rate for day at #{rate[:times]}"
+					break
+				else
+					master_rates << format_rate(rate, day)
+				end
 			end
+			break if @errors.present?
 		end
 
-		Rate.import(formatted_rates)
+		if @errors.present?
+			@successful = false
+		else
+			Rate.import(formatted_rates)
+		end
 	end
 
 	private
