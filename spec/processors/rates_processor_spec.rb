@@ -4,6 +4,7 @@ describe RatesProcessor do
 	describe '#create' do
 		shared_examples 'a successful request to update the rate' do
 			it 'creates the rate' do
+				expect(Rate).to receive(:delete_all)
 				expect(Rate).to receive(:import).with(expected_rate)
 				
 				subject.create(rates[:rates])
@@ -41,6 +42,76 @@ describe RatesProcessor do
 				end
 
 				it_behaves_like 'error due to malformed input'
+			end
+
+			context 'malformed days parameter' do
+				context 'days parameter is empty string' do
+					let(:rates) do
+						{
+							'rates': [
+								{
+									'days': '',
+									"times": '0900-2100',
+									"tz": "America/Chicago",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+
+				context 'days parameter is not a valid day format' do
+					let(:rates) do
+						{
+							'rates': [
+								{
+									'days': 'monday',
+									"times": '0900-2100',
+									"tz": "America/Chicago",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+
+				context 'days parameter is not comma separated' do
+					let(:rates) do
+						{
+							'rates': [
+								{
+									'days': 'mon.tues',
+									"times": '0900-2100',
+									"tz": "America/Chicago",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+
+				context 'days parameter has a space in between days and commas' do
+					let(:rates) do
+						{
+							'rates': [
+								{
+									'days': 'mon, tues',
+									"times": '0900-2100',
+									"tz": "America/Chicago",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
 			end
 
 			context 'malformed times parameter' do

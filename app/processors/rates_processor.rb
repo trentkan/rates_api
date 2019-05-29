@@ -1,5 +1,5 @@
 class RatesProcessor
-	class InvalidParametersViolation < Exception; end
+	class InvalidParametersException < Exception; end
 
 	attr_reader :errors, :successful
 
@@ -10,12 +10,12 @@ class RatesProcessor
 
 	def create(rates)
 		begin
-			raise InvalidParametersViolation unless rates.is_a?(Array)
+			raise InvalidParametersException unless rates.is_a?(Array)
 
 			existing_rates_with_times = {}
 
 			formatted_rates = rates.each_with_object([]) do |rate, master_rates|
-				raise InvalidParametersViolation unless parameters_valid?(rate)
+				raise InvalidParametersException unless parameters_valid?(rate)
 				
 				add_rate_if_no_overlap(rate, existing_rates_with_times, master_rates)
 
@@ -25,9 +25,10 @@ class RatesProcessor
 			if @errors.present?
 				@successful = false
 			else
+				Rate.delete_all
 				Rate.import(formatted_rates)
 			end
-		rescue ActiveRecord::NotNullViolation, InvalidParametersViolation
+		rescue InvalidParametersException
 			@successful = false
 
 			@errors << 'Poorly formatted input, please try again.'
@@ -83,7 +84,20 @@ class RatesProcessor
 		times = rate[:times] && rate[:times].split('-')
 		times_valid = times && times.length == 2 && ('0000'..'2400').include?(times.first) && ('0000'..'2400').include?(times.last)
 		price_valid = rate[:price] && rate[:price].is_a?(Integer)
+		days_valid = rate[:days] && rate[:days].length > 0 && valid_days?(rate[:days])
 
-		times_valid && price_valid && rate[:days] && rate[:tz]
+		times_valid && price_valid && days_valid && rate[:tz]
+	end
+
+	def valid_days?(days)
+		valid = true
+		days.split(',').each do |day|
+			unless ['mon', 'tues', 'wed', 'thurs', 'fri', 'sat', 'sun'].include?(day)
+				valid = false
+				break
+			end
+		end
+
+		valid
 	end
 end
