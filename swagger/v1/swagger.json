@@ -1,0 +1,58 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "API V1",
+    "version": "v1"
+  },
+  "paths": {
+    "/rates": {
+      "post": {
+        "summary": "Creates a set of rates",
+        "tags": [
+          "Rates"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "rates",
+            "in": "body",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "days": {
+                    "type": "string"
+                  },
+                  "times": {
+                    "type": "string"
+                  },
+                  "tz": {
+                    "type": "string"
+                  },
+                  "price": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "required": [
+                "days",
+                "times",
+                "tz",
+                "price"
+              ],
+              "description": "        \tA list of rates that have the following attributes:\n        \t- days: A comma separated string of days this rate is valid. Valid days are mon, tues, wed, thurs, fri, sat sun\n        \t- times: A dash separated string of two times that are between 0000 and 2400\n        \t- tz: A string that represents a time zone. Ex: America/Chicago\n        \t- price: An integer that represents the price of the rate.\n"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "rate created"
+          }
+        }
+      }
+    }
+  }
+}
