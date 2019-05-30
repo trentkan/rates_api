@@ -12,7 +12,7 @@ describe RatesProcessor do
 		end
 
 		shared_examples 'an unsuccessful request to update the rate' do
-			it 'creates the rate' do
+			it 'does not creates the rate' do
 				expect(Rate).not_to receive(:import).with(expected_rate)
 				
 				subject.create(rates[:rates])
