@@ -82,11 +82,17 @@ class RatesProcessor
 
 	def parameters_valid?(rate)
 		times = rate[:times] && rate[:times].split('-')
-		times_valid = times && times.length == 2 && ('0000'..'2400').include?(times.first) && ('0000'..'2400').include?(times.last)
+		times_valid = times && times.length == 2 &&  times.first < times.second && ('0000'..'2400').include?(times.first) && ('0000'..'2400').include?(times.last)
 		price_valid = rate[:price] && rate[:price].is_a?(Integer)
 		days_valid = rate[:days] && rate[:days].length > 0 && valid_days?(rate[:days])
+		timezone_valid = rate[:tz] && ActiveSupport::TimeZone[rate[:tz]] && consistent_timezone?(rate[:tz])
 
-		times_valid && price_valid && days_valid && rate[:tz]
+		times_valid && price_valid && days_valid && timezone_valid
+	end
+
+	def consistent_timezone?(tz)
+		@timezone_for_rates ||= tz
+		@timezone_for_rates == tz
 	end
 
 	def valid_days?(days)

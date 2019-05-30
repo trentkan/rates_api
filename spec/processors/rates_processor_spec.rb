@@ -165,6 +165,65 @@ describe RatesProcessor do
 
 					it_behaves_like 'error due to malformed input'
 				end
+
+				context 'start time is not less than end time' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"times": "2200-2000",
+									"tz": "America/Chicago",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+			end
+
+			context 'malformed timezone parameter' do
+				context 'timezone is not in IANA timezone standard' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"times": "0900-2100",
+									"tz": "America/Chi",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
+
+				context 'inconsistent timezones amongst rates' do
+					let(:rates) do
+						{
+							"rates": [
+								{
+									"days": "mon",
+									"times": "0900-2100",
+									"tz": "America/Chicago",
+									"price": 1500
+								},
+								{
+									"days": "tues",
+									"times": "0900-2100",
+									"tz": "America/New_York",
+									"price": 1500
+								}
+							]
+						}
+					end
+
+					it_behaves_like 'error due to malformed input'
+				end
 			end
 
 			context 'malformed price parameter' do
