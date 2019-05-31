@@ -11,7 +11,7 @@ class RatesController < ApplicationController
 		if rates_query.successful
 			render json: { price: result }, code: 200
 		else
-			render json: { errors: rates_processor.errors }, code: 400
+			render json: { errors: rates_query.errors }, code: 400
 		end
 	end
 
