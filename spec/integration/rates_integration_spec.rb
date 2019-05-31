@@ -1,6 +1,28 @@
 require 'swagger_helper'
 
 describe 'Rates API' do
+  path '/rates' do
+    get 'Finds a rate that matches a given date time range' do
+      tags 'Rates'
+      consumes 'application/json'
+      parameter name: :start_datetime, :in => :query, type: :string, required: true
+      parameter name: :end_datetime, :in => :query, type: :string, required: true
+
+      response '200', 'rate found' do
+        schema type: :object,
+          properties: {
+            price: { type: :string }
+          },
+          required: [ 'price' ]
+
+        let(:start_datetime) { '2015-07-01T07:00:00-05:00' }
+        let(:end_datetime) { '2015-07-01T12:00:00-05:00' }
+        
+        run_test!
+      end
+    end
+  end
+
 	path '/rates' do
     post 'Creates a set of rates' do
       tags 'Rates'

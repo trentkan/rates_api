@@ -6,6 +6,45 @@
   },
   "paths": {
     "/rates": {
+      "get": {
+        "summary": "Finds a rate that matches a given date time range",
+        "tags": [
+          "Rates"
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "start_datetime",
+            "in": "query",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "end_datetime",
+            "in": "query",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "rate found",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "price": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "price"
+              ]
+            }
+          }
+        }
+      },
       "post": {
         "summary": "Creates a set of rates",
         "tags": [

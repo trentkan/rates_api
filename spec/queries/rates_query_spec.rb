@@ -1,20 +1,16 @@
 require 'rails_helper'
 
 describe RatesQuery do
+	subject { described_class.new(start_datetime: '2015-07-01T07:00:00-05:00', end_datetime: '2015-07-01T12:00:00-05:00') }
+	
 	describe '.initialize' do
 		context 'with correctly formatted datetime parameters' do
-			subject { described_class.new(start_datetime: '2015-07-01T07:00:00-05:00', end_datetime: '2015-07-01T12:00:00-05:00') }
 			it 'does not record any errors' do
 				expect(subject.errors).to be_empty
 			end
 
 			it 'completes successfully' do
 				expect(subject.successful).to be true
-			end
-
-			it 'converts the datetimes to the America/Chicago timezone (CST)' do
-				expect(subject.local_start_datetime).to eq(Time.parse('2015-07-01T06:00:00-06:00'))
-				expect(subject.local_end_datetime).to eq(Time.parse('2015-07-01T11:00:00-06:00'))
 			end
 		end
 
@@ -43,6 +39,75 @@ describe RatesQuery do
 				let(:end_datetime) { 'not a time' }
 
 				it_behaves_like 'raises errors and does not complete successfully'
+			end
+		end
+	end
+
+	describe '#find_rate' do
+		context 'datetime range has start datetime that is past the end datetime' do
+			subject { described_class.new(start_datetime: '2015-07-01T20:00:00-05:00', end_datetime: '2015-07-01T19:00:00-05:00') }
+
+			before do
+				allow(Rate).to receive(:pluck).with(:time_zone).and_return(['America/Chicago'])
+			end
+
+			it 'records an error explaining the invalid datetime range' do
+				subject.find_rate
+				
+				expect(subject.errors.first).to eq("Invalid datetime range")
+			end
+
+			it 'does not complete successfully' do
+				subject.find_rate
+
+				expect(subject.successful).to be false
+			end
+		end
+
+		context 'datetime range is valid for rates' do
+			context 'datetime range spans more than one day' do
+				subject { described_class.new(start_datetime: '2015-07-01T20:00:00-05:00', end_datetime: '2015-07-02T01:00:00-05:00') }
+
+				it 'returns unavailable' do
+					actual_rate = subject.find_rate
+
+					expect(actual_rate).to eq 'unavailable'
+				end
+			end
+
+			context 'datetime range spans more than one day due to timezone conversion' do
+				subject { described_class.new(start_datetime: '2015-07-01T20:00:00-07:00', end_datetime: '2015-07-01T24:00:00-07:00') }
+
+				it 'returns unavailable' do
+					actual_rate = subject.find_rate
+
+					expect(actual_rate).to eq 'unavailable'
+				end
+			end
+
+			context 'with one rate that matches the datetime range' do
+				it 'returns the price for that rate' do
+					Time.zone = 'America/Chicago'
+					Rate.create(day: 'wed', start_time: 600, end_time: 1800, time_zone: 'America/Chicago', price: 1750)
+
+					actual_rate = subject.find_rate
+
+					expect(actual_rate).to eq '1750'
+				end
+			end
+
+			context 'with multiple rates that span the datetime range' do
+				subject { described_class.new(start_datetime: '2015-07-01T01:00:00-05:00', end_datetime: '2015-07-01T12:00:00-05:00') }
+
+				it 'returns unavailable' do
+					Time.zone = 'America/Chicago'
+					Rate.create(day: 'wed', start_time: 600, end_time: 1800, time_zone: 'America/Chicago', price: 1750)
+					Rate.create(day: 'wed', start_time: 100, end_time: 500, time_zone: 'America/Chicago', price: 1750)
+					
+					actual_rate = subject.find_rate
+
+					expect(actual_rate).to eq 'unavailable'
+				end
 			end
 		end
 	end
