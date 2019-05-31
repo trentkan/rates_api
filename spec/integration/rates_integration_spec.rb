@@ -28,14 +28,19 @@ describe 'Rates API' do
       tags 'Rates'
       consumes 'application/json'
       parameter name: :rates, in: :body, schema: {
-        type: :array,
-        items: {
-          type: :object,
-          properties: {
-          	days: { type: :string },
-          	times: { type: :string },
-          	tz: { type: :string },
-          	price: { type: :integer },
+        type: :object,
+        properties: {
+          rates: {
+            type: :array,
+            items: {
+              type: :object,
+              properties: {
+                days: { type: :string },
+                times: { type: :string },
+                tz: { type: :string },
+                price: { type: :integer },
+              }
+            }
           }
         },
         required: [ 'days', 'times', 'tz', 'price' ],
@@ -48,8 +53,8 @@ describe 'Rates API' do
         HEREDOC
       }
 
-      response '200', 'rate created' do
-        let(:rates) { { days: 'mon,tues', times: '0000-2400', tz: 'America/Chicago', price: 100 } }
+      response '201', 'rate created' do
+        let(:rates) { {rates: [{ days: 'mon,tues', times: '0000-2400', tz: 'America/Chicago', price: 100 }]} }
         run_test!
       end
     end

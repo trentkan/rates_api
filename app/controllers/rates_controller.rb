@@ -9,9 +9,9 @@ class RatesController < ApplicationController
 		result = rates_query.find_rate
 
 		if rates_query.successful
-			render json: { price: result }, code: 200
+			render json: { price: result }, status: 200
 		else
-			render json: { errors: rates_query.errors }, code: 400
+			render json: { errors: rates_query.errors }, status: 400
 		end
 	end
 
@@ -28,9 +28,9 @@ class RatesController < ApplicationController
 		rates_processor.create(params[:rates])
 
 		if rates_processor.successful
-			render :json, code: 200
+			render json: { }, status: 201
 		else
-			render json: { errors: rates_processor.errors }, code: 400
+			render json: { errors: rates_processor.errors }, status: 400
 		end
 	end
 

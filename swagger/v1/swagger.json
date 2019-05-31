@@ -58,21 +58,26 @@
             "name": "rates",
             "in": "body",
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "days": {
-                    "type": "string"
-                  },
-                  "times": {
-                    "type": "string"
-                  },
-                  "tz": {
-                    "type": "string"
-                  },
-                  "price": {
-                    "type": "integer"
+              "type": "object",
+              "properties": {
+                "rates": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "days": {
+                        "type": "string"
+                      },
+                      "times": {
+                        "type": "string"
+                      },
+                      "tz": {
+                        "type": "string"
+                      },
+                      "price": {
+                        "type": "integer"
+                      }
+                    }
                   }
                 }
               },
@@ -87,7 +92,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "rate created"
           }
         }
