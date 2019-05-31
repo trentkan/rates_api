@@ -312,7 +312,7 @@ describe RatesProcessor do
 			end
 
 			let(:expected_rate) do 
-				[{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 }]
+				[{ day: 'mon', start_time: 900, end_time: 2100, time_zone: 'America/Chicago', price: 1500 }]
 			end
 
 			it_behaves_like 'a successful request to update the rate'
@@ -334,8 +334,8 @@ describe RatesProcessor do
 
 			let(:expected_rate) do
 				[
-					{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
-					{ day: 'tues', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 }
+					{ day: 'mon', start_time: 900, end_time: 2100, time_zone: 'America/Chicago', price: 1500 },
+					{ day: 'tues', start_time: 900, end_time: 2100, time_zone: 'America/Chicago', price: 1500 }
 				]
 			end
 				
@@ -363,8 +363,8 @@ describe RatesProcessor do
 
 				let(:expected_rate) do
 					[
-						{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
-						{ day: 'tues', start_time: '01:00', end_time: '10:00', time_zone: 'America/Chicago', price: 2500 }
+						{ day: 'mon', start_time: 900, end_time: 2100, time_zone: 'America/Chicago', price: 1500 },
+						{ day: 'tues', start_time: 100, end_time: 1000, time_zone: 'America/Chicago', price: 2500 }
 					]
 				end
 					
@@ -395,8 +395,8 @@ describe RatesProcessor do
 
 				let(:expected_rate) do
 					[
-						{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
-						{ day: 'mon', start_time: '01:00', end_time: '09:00', time_zone: 'America/Chicago', price: 2500 }
+						{ day: 'mon', start_time: 900, end_time: 2100, time_zone: 'America/Chicago', price: 1500 },
+						{ day: 'mon', start_time: 100, end_time: 900, time_zone: 'America/Chicago', price: 2500 }
 					]
 				end
 					
@@ -425,8 +425,8 @@ describe RatesProcessor do
 
 				let(:expected_rate) do
 					[
-						{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
-						{ day: 'mon', start_time: '21:00', end_time: '24:00', time_zone: 'America/Chicago', price: 2500 }
+						{ day: 'mon', start_time: 900, end_time: 2100, time_zone: 'America/Chicago', price: 1500 },
+						{ day: 'mon', start_time: 2100, end_time: 2400, time_zone: 'America/Chicago', price: 2500 }
 					]
 				end
 					
@@ -456,8 +456,8 @@ describe RatesProcessor do
 
 					let(:expected_rate) do
 						[
-							{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
-							{ day: 'mon', start_time: '20:00', end_time: '24:00', time_zone: 'America/Chicago', price: 2500 }
+							{ day: 'mon', start_time: 900, end_time: 2100, time_zone: 'America/Chicago', price: 1500 },
+							{ day: 'mon', start_time: 2000, end_time: 2400, time_zone: 'America/Chicago', price: 2500 }
 						]
 					end
 						
@@ -486,8 +486,8 @@ describe RatesProcessor do
 
 					let(:expected_rate) do
 						[
-							{ day: 'mon', start_time: '09:00', end_time: '21:00', time_zone: 'America/Chicago', price: 1500 },
-							{ day: 'mon', start_time: '01:00', end_time: '10:00', time_zone: 'America/Chicago', price: 2500 }
+							{ day: 'mon', start_time: 900, end_time: 2100, time_zone: 'America/Chicago', price: 1500 },
+							{ day: 'mon', start_time: 100, end_time: 1000, time_zone: 'America/Chicago', price: 2500 }
 						]
 					end
 						
@@ -516,8 +516,8 @@ describe RatesProcessor do
 					
 					let(:expected_rate) do
 						[
-							{ day: 'mon', start_time: '09:00', end_time: '11:00', time_zone: 'America/Chicago', price: 1500 },
-							{ day: 'mon', start_time: '08:00', end_time: '12:00', time_zone: 'America/Chicago', price: 2500 }
+							{ day: 'mon', start_time: 900, end_time: 1100, time_zone: 'America/Chicago', price: 1500 },
+							{ day: 'mon', start_time: 800, end_time: 1200, time_zone: 'America/Chicago', price: 2500 }
 						]
 					end
 						

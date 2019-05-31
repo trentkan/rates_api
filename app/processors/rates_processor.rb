@@ -52,8 +52,8 @@ class RatesProcessor
 		time = rate[:times].split('-')
 		{
 			day: day,
-			start_time: time.first.scan(/../).join(':'),
-			end_time: time.last.scan(/../).join(':'),
+			start_time: time.first.to_i,
+			end_time: time.last.to_i,
 			time_zone: rate[:tz],
 			price: rate[:price]
 		}
