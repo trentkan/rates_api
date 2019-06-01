@@ -30,12 +30,12 @@ class RatesQuery
 					return rates.first.price.to_s if rates.length == 1
 				end
 			end
+			
+			return 'unavailable'
 		rescue InvalidDateTimeException
 			@errors << "Invalid datetime range"
 			@successful = false
 		end
-
-		'unavailable'
 	end
 
 	private

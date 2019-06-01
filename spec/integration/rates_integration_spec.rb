@@ -20,6 +20,21 @@ describe 'Rates API' do
         
         run_test!
       end
+
+      response '400', 'rate not found' do
+        let(:start_datetime) { '2015-07-01T13:00:00-05:00' }
+        let(:end_datetime) { '2015-07-01T12:00:00-05:00' }
+
+        before do |example|
+          Time.zone = 'America/Chicago'
+          Rate.create(day: 'wed', start_time: 600, end_time: 1800, time_zone: 'America/Chicago', price: 1750)        
+          submit_request(example.metadata)
+        end
+
+        it 'returns a 400 response' do |example|
+          assert_response_matches_metadata(example.metadata)
+        end
+      end
     end
   end
 
@@ -29,21 +44,21 @@ describe 'Rates API' do
       consumes 'application/json'
       parameter name: :rates, in: :body, schema: {
         type: :object,
+        required: true,
         properties: {
           rates: {
             type: :array,
             items: {
               type: :object,
               properties: {
-                days: { type: :string },
-                times: { type: :string },
-                tz: { type: :string },
-                price: { type: :integer },
+                days: { type: :string, required: true },
+                times: { type: :string, required: true },
+                tz: { type: :string, required: true },
+                price: { type: :integer, required: true },
               }
             }
           }
         },
-        required: [ 'days', 'times', 'tz', 'price' ],
         description: <<-HEREDOC 
         	A list of rates that have the following attributes:
         	- days: A comma separated string of days this rate is valid. Valid days are mon, tues, wed, thurs, fri, sat sun
@@ -55,6 +70,11 @@ describe 'Rates API' do
 
       response '201', 'rate created' do
         let(:rates) { {rates: [{ days: 'mon,tues', times: '0000-2400', tz: 'America/Chicago', price: 100 }]} }
+        run_test!
+      end
+
+      response '400', 'rate not created' do
+        let(:rates) { {} }
         run_test!
       end
     end

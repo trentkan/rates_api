@@ -28,7 +28,7 @@ class RatesController < ApplicationController
 		rates_processor.create(params[:rates])
 
 		if rates_processor.successful
-			render json: { }, status: 201
+			render :json, status: 201
 		else
 			render json: { errors: rates_processor.errors }, status: 400
 		end

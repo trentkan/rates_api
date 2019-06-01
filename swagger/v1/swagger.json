@@ -35,13 +35,17 @@
               "type": "object",
               "properties": {
                 "price": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "Can be a price rate or unavailable if rate spans multiple days or request spans multiple rates"
                 }
               },
               "required": [
                 "price"
               ]
             }
+          },
+          "400": {
+            "description": "rate not found"
           }
         }
       },
@@ -59,6 +63,7 @@
             "in": "body",
             "schema": {
               "type": "object",
+              "required": true,
               "properties": {
                 "rates": {
                   "type": "array",
@@ -66,27 +71,25 @@
                     "type": "object",
                     "properties": {
                       "days": {
-                        "type": "string"
+                        "type": "string",
+                        "required": true
                       },
                       "times": {
-                        "type": "string"
+                        "type": "string",
+                        "required": true
                       },
                       "tz": {
-                        "type": "string"
+                        "type": "string",
+                        "required": true
                       },
                       "price": {
-                        "type": "integer"
+                        "type": "integer",
+                        "required": true
                       }
                     }
                   }
                 }
               },
-              "required": [
-                "days",
-                "times",
-                "tz",
-                "price"
-              ],
               "description": "        \tA list of rates that have the following attributes:\n        \t- days: A comma separated string of days this rate is valid. Valid days are mon, tues, wed, thurs, fri, sat sun\n        \t- times: A dash separated string of two times that are between 0000 and 2400\n        \t- tz: A string that represents a time zone. Ex: America/Chicago\n        \t- price: An integer that represents the price of the rate.\n"
             }
           }
@@ -94,6 +97,9 @@
         "responses": {
           "201": {
             "description": "rate created"
+          },
+          "400": {
+            "description": "rate not created"
           }
         }
       }
