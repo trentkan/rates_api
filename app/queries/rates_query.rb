@@ -1,5 +1,20 @@
+=begin
+ This object is responsible for taking a start and end date time,
+ verifying that it meets an iso-8601 datetime format (http://support.sas.com/documentation/cdl/en/lrdict/64316/HTML/default/viewer.htm#a003169814.htm)
+ and returning a rate if there is one rate for the time range provided.
+
+ If there is more than one range that meets the requested time range, it will return 'unavailable'
+ If there are no rates that meet the requested time range, it will return 'unavailable'
+
+ Invalid ranges can occur if the range spans more than one day when converted to the range of stored timezones or
+ if the start of the range is after the end of the range. This will result in an Invalid datetime range error.
+
+ If the start or end datetime is not iso-8601 compliant, the <datetime> is not iso8601 compliant error will be raised.
+ If no date is provided with the start or end datetime, it will assume the current date in the UTC timezone.
+ If no time is provided with the start or end datetime, it will assume 00:00:00 in the UTC timezone.
+=end
+
 class RatesQuery
-	class InvalidDateFormatException < Exception; end
 	class InvalidDateTimeException < Exception; end
 
 	attr_reader :successful, :errors
@@ -17,15 +32,15 @@ class RatesQuery
 			stored_timezones.each do |stored_timezone| 
 				Time.zone = ActiveSupport::TimeZone[stored_timezone]
 
-				@start_datetime = Time.zone.parse(start_datetime)
-				@end_datetime = Time.zone.parse(end_datetime)
+				@start_datetime = start_datetime.in_time_zone
+				@end_datetime = end_datetime.in_time_zone
 
 				raise InvalidDateTimeException unless valid_range_for_datetimes?
 				
 				if same_day_for_datetimes?
 					rates = Rate.where(day: days[start_datetime.wday])
-											.where("start_time < #{formatted_time_from(start_datetime)}")
-											.where("end_time > #{formatted_time_from(end_datetime)}")
+											.where("start_time <= #{formatted_time_from(start_datetime)}")
+											.where("end_time >= #{formatted_time_from(end_datetime)}")
 
 					return rates.first.price.to_s if rates.length == 1
 				end
@@ -62,9 +77,8 @@ class RatesQuery
 
 	def time_for(datetime)
 		begin
-			raise InvalidDateFormatException unless iso8601_compliant?(datetime)
-			datetime
-		rescue InvalidDateFormatException
+			DateTime.iso8601(datetime)
+		rescue ArgumentError
 			@successful = false
 			@errors << "#{datetime} is not iso8601 compliant"
 		end

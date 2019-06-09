@@ -15,10 +15,6 @@ ActiveRecord::Schema.define(version: 2019_05_27_160310) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "rate_timezones", force: :cascade do |t|
-    t.string "timezone", null: false
-  end
-
   create_table "rates", force: :cascade do |t|
     t.string "day", null: false
     t.integer "start_time", null: false

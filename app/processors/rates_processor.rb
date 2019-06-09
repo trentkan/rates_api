@@ -1,3 +1,12 @@
+=begin
+ This object is responsible for taking an array of rates,
+ verifying that the rates have all required attributes and are correctly formatted,
+ and creates each rate in the rates table.
+
+ If there are any existing rates, it will delete them before creating a new set of rates.
+
+=end
+
 class RatesProcessor
 	class InvalidParametersException < Exception; end
 
